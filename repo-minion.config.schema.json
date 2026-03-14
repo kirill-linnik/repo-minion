@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "./repo-minion.config.schema.json",
+  "title": "repo-minion config",
+  "type": "object",
+  "required": [
+    "excludePaths",
+    "repositories"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "excludePaths": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "repositories": {
+      "type": "object",
+      "minProperties": 1,
+      "patternProperties": {
+        "^[^\\s]+$": {
+          "type": "object",
+          "required": [
+            "aliases",
+            "scanRoot"
+          ],
+          "properties": {
+            "aliases": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "uniqueItems": true
+            },
+            "scanRoot": {
+              "type": "string",
+              "minLength": 1,
+              "anyOf": [
+                {
+                  "pattern": "^[A-Za-z]:[\\\\/].+"
+                },
+                {
+                  "pattern": "^/.*"
+                },
+                {
+                  "pattern": "^\\\\\\\\.*"
+                },
+                {
+                  "pattern": "^(?![A-Za-z]:[\\\\/]|/|\\\\\\\\).+"
+                }
+              ]
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
