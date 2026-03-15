@@ -8,13 +8,13 @@ outputs:
   - selected repository key
   - selected repository scanRoot boundary record
   - excludePaths record
-  - explicit user selection confirmation record
+  - explicit user selection authorization record
 tools:
   - builtin:filesystem
 failure_behavior:
   - If config is missing, unreadable, or invalid, stop and request human correction.
   - If user input does not include an explicit repository key/alias, stop and request explicit selection.
-  - If resolved repository is not explicitly confirmed by the user, stop and request confirmation.
+  - If resolved repository is not explicitly confirmed by the user for an analysis task, stop and request confirmation.
   - If repository key/alias cannot be resolved uniquely, stop and request human correction.
   - If selected scanRoot path is invalid, inaccessible, or does not exist, stop and return a path-debug report.
 ---
@@ -38,16 +38,18 @@ If exactly one repository exists in config, still require explicit selection; si
 If no repositories match, stop and ask the user for a valid key or alias from config.
 If multiple repositories match the same alias, treat configuration as invalid and notify user about that.
 If multiple repositories match, stop and ask the user to disambiguate using the exact repository key.
-After resolving a unique repository, echo the resolved key and require explicit user confirmation before scanning.
+After resolving a unique repository, inspect the explicit task in the user message.
+If the task is a direct update request for that same repository, treat the request phrase as explicit authorization and do not ask for a second confirmation.
+Otherwise, echo the resolved key and require explicit user confirmation before scanning.
 Never guess `scanRoot`, never synthesize missing config values, and never continue with partial resolution.
 Validate the resolved `scanRoot` exists and is readable.
 If the path is invalid or missing, return a path-debug report with the repository key, configured path, resolved path basis, and failure reason.
 Do not request additional repository access outside the resolved `scanRoot`; treat that boundary as the only readable subtree.
 Record the selected repository key, normalized `scanRoot`, and `excludePaths` values for memory assembly.
-Record the explicit selection and confirmation tokens used to authorize the repository boundary.
+Record the explicit selection and authorization tokens used to authorize the repository boundary.
 
 ## Trust Boundary Initialization
-After the user confirms the resolved repository, perform a single directory listing of the `scanRoot` itself as the first filesystem operation.
+After the user confirms the resolved repository for analysis tasks, or after a direct `update <repository>` request authorizes the resolved repository, perform a single directory listing of the `scanRoot` itself as the first filesystem operation.
 This single listing establishes the access grant for the entire `scanRoot` subtree and is the only access prompt the user should see during the entire scan session.
 All subsequent filesystem reads and directory listings under `scanRoot` must reuse this grant without requesting further approvals.
 Do not list or read any subdirectory before issuing this root-level listing.
@@ -59,4 +61,5 @@ Path-debug output contains only observable validation failures.
 No files outside the selected repository `scanRoot` are read.
 No additional subfolder access prompts are requested under the selected repository `scanRoot`.
 No assumptions, inferred intent, or fabricated values are emitted.
-Single-repository configuration never bypasses explicit selection and confirmation requirements.
+Single-repository configuration never bypasses explicit selection requirements.
+Direct `update <repository>` requests may satisfy authorization after explicit repository resolution.
