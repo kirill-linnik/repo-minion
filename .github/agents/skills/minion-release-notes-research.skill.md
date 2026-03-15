@@ -22,6 +22,7 @@ failure_behavior:
   - If `.vscode/mcp.json` does not define a `github` server, record the workspace MCP contract failure and fall back to package-maintainer or registry documentation.
   - If GitHub MCP is unavailable for a dependency, use package-maintainer or registry documentation as fallback and record the fallback source.
   - If neither GitHub MCP nor maintainer documentation can establish a safe target version, leave the dependency unchanged and record it as unresolved.
+  - If a GitHub tag or release version is not confirmed present in the canonical registry for that ecosystem, treat it as unpublished and fall back to the registry-confirmed latest version. Record the discrepancy as `github-tag-unpublished; registry-latest used`.
 ---
 
 ## Purpose
@@ -41,8 +42,14 @@ For each dependency candidate:
    d. Any other GitHub MCP error (network failure, unexpected 5xx) is treated the same as 403 — fall through to configured fallback sources and record the failure.
 2. If GitHub MCP did not provide sufficient data, use only the configured fallback source classes in order.
 3. Determine the latest available version, including major releases.
-4. Summarize breaking changes, required migrations, deprecated API replacements, and recommended compatibility changes.
-5. Record the provenance source used for the decision and whether it came from the primary source or a configured fallback.
+4. **Registry cross-check (required for all ecosystem packages):** After determining a candidate version from GitHub MCP, verify that version exists in the dependency's canonical package registry before accepting it as the target:
+   - Python → PyPI: fetch `https://pypi.org/pypi/<package>/<version>/json` and confirm a 200 response.
+   - Node.js → npm registry: fetch `https://registry.npmjs.org/<package>/<version>` and confirm a 200 response.
+   - Java (Maven Central) → use `maven-tools` MCP `check_version_exists` for the exact groupId:artifactId:version.
+   - CocoaPods → verify the podspec for the version exists in the CocoaPods Specs trunk or the pod's source repository.
+   If the registry does not have the candidate version, the tag was never published and must be rejected as a target. Use the highest version the registry confirms as the authoritative latest instead. Record the discrepancy in the provenance note as `github-tag-unpublished; registry-latest used`. Never emit a target version derived solely from a GitHub release tag or git tag without confirming it is present in the corresponding registry.
+5. Summarize breaking changes, required migrations, deprecated API replacements, and recommended compatibility changes.
+6. Record the provenance source used for the decision and whether it came from the primary source or a configured fallback.
 
 Select target versions conservatively but precisely:
 - Use a precise target version number, not an open-ended range.
