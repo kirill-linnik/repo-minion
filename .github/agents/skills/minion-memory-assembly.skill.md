@@ -26,6 +26,18 @@ This file is the overview layer of a two-layer memory model. CLAUDE.md files are
 ## Method
 Write `.repo-minion/memory/<repository-key>.md` inside the **repo-minion agent workspace root** (not inside the scanned repository's `scanRoot`). Resolve this path relative to the agent's own workspace root, never relative to the target repository.
 
+> **CRITICAL — path disambiguation:**
+> The agent workspace root is the directory that contains `repo-minion.config.json`.
+> The scanned repository `scanRoot` is the directory configured in that config file.
+> These are two separate directories. The memory file MUST be written under the agent workspace root,
+> NOT under `scanRoot`.
+>
+> Correct example (agent workspace root = `E:\drive\repo-minion`, repository key = `swimplify`):
+>   `E:\drive\repo-minion\.repo-minion\memory\swimplify.md`   ← CORRECT
+>
+> Wrong example (do NOT write here):
+>   `E:\drive\swimplify\.repo-minion\memory\swimplify.md`     ← WRONG — this is inside scanRoot
+
 Produce the file with the following structure:
 
 ```
