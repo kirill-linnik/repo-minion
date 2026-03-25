@@ -104,6 +104,6 @@ Foundation and maintenance agent for multi-repository scanning with a strict ana
 7. If new or corrected knowledge was learned, rerun `minion-claude-md-validation`, `minion-claude-md-generation`, and `minion-memory-assembly` for affected projects and repository memory.
 8. `minion-update-summary`
 
-repo-minion writes repository-scoped memory to `.repo-minion/memory/<repository-key>.md`.
+repo-minion writes repository-scoped memory to `.repo-minion/memory/<repository-key>.md` **inside the agent workspace root** (the directory that contains `repo-minion.config.json`) — NEVER inside the scanned repository's `scanRoot`.
 For analysis tasks, repo-minion stops after producing fact-only memory and CLAUDE.md files and requires human review.
 For update tasks, repo-minion runs analysis first when needed, updates dependencies project by project, refreshes affected `CLAUDE.md` and repository memory files when knowledge changed, and returns a structured maintenance report.
