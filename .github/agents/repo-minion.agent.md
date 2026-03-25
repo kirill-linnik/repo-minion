@@ -60,5 +60,5 @@ Foundation and exploration agent for multi-repository scanning with strict fact-
 7. `minion-claude-md-generation`
 8. `minion-memory-assembly`
 
-repo-minion writes repository-scoped memory to `.repo-minion/memory/<repository-key>.md`.
+repo-minion writes repository-scoped memory to `.repo-minion/memory/<repository-key>.md` **inside the agent workspace root** (the directory that contains `repo-minion.config.json`) — NEVER inside the scanned repository's `scanRoot`.
 repo-minion stops after producing fact-only memory and CLAUDE.md files and requires human review.
