@@ -32,6 +32,19 @@ Inspect the explicit user task and classify it as one of:
 For `analysis`, stop after the analysis workflow completes.
 
 For `update`, load `.repo-minion/memory/<repository-key>.md` from the repo-minion workspace root.
+
+> **CRITICAL — path disambiguation:**
+> The repo-minion workspace root is the directory that contains `repo-minion.config.json`.
+> This is NOT the scanned repository's `scanRoot`.
+> These are two separate directories. Always resolve the memory file path relative to the agent workspace root,
+> NOT relative to `scanRoot`.
+>
+> Correct example (agent workspace root = `E:\drive\repo-minion`, repository key = `swimplify`):
+>   `E:\drive\repo-minion\.repo-minion\memory\swimplify.md`   ← CORRECT
+>
+> Wrong example (do NOT look here):
+>   `E:\drive\swimplify\.repo-minion\memory\swimplify.md`     ← WRONG — this is inside scanRoot
+
 Treat the memory file as the only readiness contract.
 Look for explicit markers in the `Analysis Status` and `Dependency Update Readiness` sections.
 
